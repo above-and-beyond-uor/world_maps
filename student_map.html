@@ -18,8 +18,8 @@ body{
 <div class="text-secondary">If you think your response on <a href="https://forms.gle/iSGKvA2Rdzp59HLQA" target="_blank">https://forms.gle/iSGKvA2Rdzp59HLQA</a> hasn't come through, or see anything else wrong with this page, please contact <a href="https://www.reading.ac.uk/search/search-staff-details.aspx?id=21031" target="_blank">Anthony Haffey</a></div>
 
 <div class="results"></div>
-<div id="staff_map_div" style="width: 100%; height:400px;"></div>
-<div id="staff_list_div"></div>
+<div id="summer_map_div" style="width: 100%; height:400px;"></div>
+<div id="summer_list_div"></div>
 <script>
 $("#contributors_btn").on("click",function(){
 	bootbox.alert("In alphabetical order: <br>" +								
@@ -130,8 +130,8 @@ function update_map(){
 			
 			table_content += "</tbody>"  + "</table>";
 			
-			$("#staff_list_div").html(table_content);
-			AmCharts.makeChart( "staff_map_div", {
+			$("#summer_list_div").html(table_content);
+			AmCharts.makeChart( "summer_map_div", {
 				"type": "map",
 				"dataProvider": {
 					"map": "worldLow",
