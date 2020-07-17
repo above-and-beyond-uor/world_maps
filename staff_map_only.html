@@ -54,7 +54,7 @@ var ParseGSX = (function() {
 
 })();
 function update_map(){
-	ParseGSX.parseGSX("15udnyjjCSBO-nSrOqR9Nu25AAwWIYfu9JjPGXUbDnL8",function(data){
+	ParseGSX.parseGSX("1B46P-OpL4nfMMzt37QEKwYmNjpJQCdt5dSX2abH34qY",function(data){
     
     if(JSON.stringify(data) !== JSON.stringify(current_data)){
       current_data = JSON.parse(JSON.stringify(data));
@@ -124,7 +124,6 @@ function update_map(){
         }
       });
 
-      console.dir(data);
       data = data.map(function(row){
         
         row.id = row.code;
