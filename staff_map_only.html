@@ -1,170 +1,21 @@
 <link rel="stylesheet" href="libraries/bootstrapCollector.css">
+
 <script src="libraries/jquery-3.3.1.min.js"></script>
+
+<script src="libraries/amchart4/core.js"></script>
+<script src="libraries/amchart4/maps.js"></script>
+<script src="libraries/amchart4/worldLow.js"></script>
+<script src="libraries/amchart4/countries2.js"></script>
+<script src="libraries/amchart4/animated.js"></script>
+
+<script src="sosed_amchart.js"></script>
 
 <script src="libraries/bootbox.4.4.0.min.js"></script>
 <script src="libraries/bootstrap.4.0.min.js"></script>
 <script src="libraries/papaparse.4.3.6.min.js"></script>
-
-<!-- packages to be abandoned -->
-
-<script src="libraries/ammap.js"></script>
-<script src="libraries/worldLow.js"></script>
-<script src="libraries/ammap_theme_light.js"></script>
-
-
-<!-- Resources -->
-<script src="https://cdn.amcharts.com/lib/4/core.js"></script>
-<script src="https://cdn.amcharts.com/lib/4/maps.js"></script>
-<script src="https://cdn.amcharts.com/lib/4/geodata/worldLow.js"></script>
-<script src="https://cdn.amcharts.com/lib/4/geodata/data/countries2.js"></script>
-<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
-
-<div id="summer_map_div" style="width: 100%; height:100%;"></div>
+<div id="staff_map_div" style="width: 100%; height:100%;"></div>
 <script>
-var current_data;
-var ParseGSX = (function() {
-
-  var _defaultCallback = function(data) {
-    console.log(data);
-  };
-
-  var _parseRawData = function(res) {
-    var finalData = [];
-    res.feed.entry.forEach(function(entry){
-      var parsedObject = {};
-      for (var key in entry) {
-        if (key.substring(0,4) === "gsx$") {
-          parsedObject[key.slice(4)] = entry[key]["$t"];
-        }
-      }
-      finalData.push(parsedObject);
-    });
-    var processGSXData = _defaultCallback;
-    processGSXData(finalData);
-  };
-
-  var parseGSX = function(spreadsheetID, callback) {
-    var url = "https://spreadsheets.google.com/feeds/list/" + spreadsheetID + "/2/public/values?alt=json";
-    var ajax = $.ajax(url);
-    if (callback) { _defaultCallback = callback; }
-    $.when(ajax).then(_parseRawData);
-  };
-
-  return { parseGSX: parseGSX };
-
-})();
-function update_map(){
-	ParseGSX.parseGSX("1B46P-OpL4nfMMzt37QEKwYmNjpJQCdt5dSX2abH34qY",function(data){
-    
-    if(JSON.stringify(data) !== JSON.stringify(current_data)){
-      current_data = JSON.parse(JSON.stringify(data));
-      am4core.ready(function() {
-
-      // Themes begin
-      am4core.useTheme(am4themes_animated);
-      // Themes end
-
-      var continents = {
-        "AF": 0,
-        "AN": 0,
-        "AS": 0,
-        "EU": 0,
-        "NA": 0,
-        "OC": 0,
-        "SA": 0
-      }
-
-      // Create map instance
-      var chart = am4core.create("summer_map_div", am4maps.MapChart);
-      chart.projection = new am4maps.projections.Miller();
-
-      // Create map polygon series for world map
-      var worldSeries = chart.series.push(new am4maps.MapPolygonSeries());
-      worldSeries.useGeodata = true;
-      worldSeries.geodata = am4geodata_worldLow;
-      worldSeries.exclude = ["AQ"];
-
-      var worldPolygon = worldSeries.mapPolygons.template;
-      worldPolygon.tooltipText = "{name}";
-      worldPolygon.nonScalingStroke = true;
-      worldPolygon.strokeOpacity = 0.5;
-      worldPolygon.fill = am4core.color("#eee");
-      worldPolygon.propertyFields.fill = "color";
-
-      var hs = worldPolygon.states.create("hover");
-      hs.properties.fill = chart.colors.getIndex(9);
-
-
-      // Create country specific series (but hide it for now)
-      var countrySeries = chart.series.push(new am4maps.MapPolygonSeries());
-      countrySeries.useGeodata = true;
-      countrySeries.hide();
-      countrySeries.geodataSource.events.on("done", function(ev) {
-        worldSeries.hide();
-        countrySeries.show();
-      });
-
-      var countryPolygon = countrySeries.mapPolygons.template;
-      countryPolygon.tooltipText = "{name}";
-      countryPolygon.nonScalingStroke = true;
-      countryPolygon.strokeOpacity = 0.5;
-      countryPolygon.fill = am4core.color("#eee");
-
-      var hs = countryPolygon.states.create("hover");
-      hs.properties.fill = chart.colors.getIndex(9);
-
-      // Set up click events
-      worldPolygon.events.on("hit", function(ev) {
-        ev.target.series.chart.zoomToMapObject(ev.target);
-        var map = ev.target.dataItem.dataContext.map;
-        if (map) {
-          ev.target.isHover = false;
-          countrySeries.geodataSource.url = "https://www.amcharts.com/lib/4/geodata/json/" + map + ".json";
-          countrySeries.geodataSource.load();
-        }
-      });
-
-      data = data.map(function(row){
-        
-        row.id = row.code;
-        
-        var country = am4geodata_data_countries2[row.id];
-        
-        if(row.frequency > 0){
-          row.color = chart.colors.getIndex(continents[country.continent_code]);
-        }
-        
-        row.map = country.maps[0];
-        
-        return row;
-      });
-      
-      worldSeries.data = data;
-
-      // Zoom control
-      chart.zoomControl = new am4maps.ZoomControl();
-
-      var homeButton = new am4core.Button();
-      homeButton.events.on("hit", function() {
-        worldSeries.show();
-        countrySeries.hide();
-        chart.goHome();
-      });
-
-      homeButton.icon = new am4core.Sprite();
-      homeButton.padding(7, 5, 7, 5);
-      homeButton.width = 30;
-      homeButton.icon.path = "M16,8 L14,8 L14,16 L10,16 L10,10 L6,10 L6,16 L2,16 L2,8 L0,8 L8,0 L16,8 Z M16,8";
-      homeButton.marginBottom = 10;
-      homeButton.parent = chart.zoomControl;
-      homeButton.insertBefore(chart.zoomControl.plusButton);
-
-      });
-    }
-	});
-}
-update_map();
-setInterval(function(){
-	update_map();
-},5000);
+sosed_amchart("staff_map_div",
+              "1B46P-OpL4nfMMzt37QEKwYmNjpJQCdt5dSX2abH34qY",
+              "staff_list_div");
 </script>
