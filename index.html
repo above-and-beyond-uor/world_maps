@@ -24,7 +24,7 @@ body{
 
 <ul class="nav nav-tabs mb-3" id="pills-tab" role="tablist">
 	<li class="nav-item">
-		<a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#navs-home" role="tab" aria-controls="pills-home" aria-selected="true">Where we are for Summer</a>
+		<a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#navs-home" role="tab" aria-controls="pills-home" aria-selected="true">Where we were for Summer 2020</a>
 	</li>
 	<li class="nav-item">
 		<a class="nav-link" id="pills-staff-tab" data-toggle="pill" href="#navs-staff" role="tab" aria-controls="pills-profile" aria-selected="false">Staff nationalities</a>
@@ -38,7 +38,27 @@ body{
     <div id="staff_nationalities_div"></div>
 	</div>
 </div>
+<button class="btn btn-primary" id="contributors_btn" style="width:100%">Contributors</button></h4>
 <script>
 $("#summer_div").load("student_map.html");
 $("#staff_nationalities_div").load("staff_pilot.html");
+
+$("#contributors_btn").on("click",function(){
+  var this_table = $("<table>");
+      this_table.addClass("table")
+                .append("<tr>")
+                .append("<td>Alana James</td>")
+                .append("<td>Reviewer No. 1</td>")
+                .append("<tr>")
+                .append("<td>Anthony Haffey</td>")
+                .append("<td>Coding and idea conception</td>")
+                .append("<tr>")
+                .append("<td>Dan Brady</td>")
+                .append("<td>Coding</td>")
+                .append("<tr>")
+                .append("<td>Dan Jones</td>")
+                .append("<td>Design and idea conception</td>");
+
+  bootbox.alert("In alphabetical order: <br>" + this_table[0].outerHTML);
+});
 </script>
