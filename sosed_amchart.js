@@ -243,6 +243,7 @@ function sosed_amchart(map_div_id,
 
       }
     });
+    update_map();
   },5000);
 
 }
