@@ -37,17 +37,15 @@ function sosed_amchart(map_div_id,
   var continents;
   function update_map(){
     ParseGSX.parseGSX(sheet_id,function(data){
-      
+
       if(JSON.stringify(data) !== JSON.stringify(current_data)){
-      
-        var table_content = "<table class='table'>" +
-                              "<thead>" +
-                                "<tr>" +
-                                  "<th scope='col'>Country</th>" +
-                                  "<th scope='col'>Number of people</th>" +
-                                "</tr>" +
-                              "</thead>" +
-                              "<tbody>";
+        var this_table = $("<table>");
+            this_table.addClass("table")
+                      .append("<thead>")
+                      .append("<tr>")
+                      .append("<th scope='col'>Country</th>")
+                      .append("<th scope='col'>Number of people</th>");
+
         current_data = JSON.parse(JSON.stringify(data));
         am4core.ready(function() {
 
@@ -56,13 +54,13 @@ function sosed_amchart(map_div_id,
         // Themes end
 
         continents = {
-          "AF": 2,
-          "AN": 2,
-          "AS": 2,
-          "EU": 2,
-          "NA": 2,
-          "OC": 2,
-          "SA": 2
+          "AF": 1,
+          "AN": 4,
+          "AS": 8,
+          "EU": 12,
+          "NA": 16,
+          "OC": 20,
+          "SA": 24
         }
 
         // Create map instance
@@ -114,53 +112,53 @@ function sosed_amchart(map_div_id,
             countrySeries.geodataSource.load();
           }
         });
-        
-        
+
+
         var row_order = Object.keys(data);
 
 
         row_order.sort(function(a,b) {
           return data[a].frequency - data[b].frequency;
         });
-        
+
         data_sorted = [];
         for(var i = 0; i < data.length; i++){
           data_sorted[i] = data[row_order[i]];
         }
         data_sorted = data_sorted.reverse();
-        
+
         data_sorted.forEach(function(row){
           if(row.frequency !== "" && parseFloat(row.frequency) !== 0){
-            table_content +=  "<tr>"+
-                                "<td>" + row.country + "</td>" +
-                                "<td>" + row.frequency + "</td>" +
-                              "</tr>";					
+            this_table.append("<tr>")
+                      .append("<td>" + row.country + "</td>")
+                      .append("<td>" + row.frequency + "</td>");
           }
         });
-        
-        
+
+
         data = data.map(function(row){
-          
+
           row.id = row.code;
-          
+
           var country = am4geodata_data_countries2[row.id];
-          
+
           if(row.frequency > 0){
             row.color = chart.colors.getIndex(continents[country.continent_code]);
-            
+
           }
-          
+
           //row.map = country.maps[0];
-          
-          
-          
-          
+
+
+
+
           return row;
         });
-        
-        table_content += "</tbody>"  + "</table>";
-        $("#" + table_id).html(table_content);
-        
+
+        //table_content += "</tbody>"  + "</table>";
+        //$("#" + table_id).html(table_content);
+        $("#" + table_id).html(this_table[0].outerHTML);
+
         worldSeries.data = data;
 
         // Zoom control
@@ -187,11 +185,11 @@ function sosed_amchart(map_div_id,
   }
   update_map();
   setInterval(function(){
-    
+
     ParseGSX.parseGSX(sheet_id,function(data){
-      
+
       if(JSON.stringify(data) !== JSON.stringify(current_data)){
-        
+
         current_data = JSON.parse(JSON.stringify(data));
         var table_content = "<table class='table'>" +
                               "<thead>" +
@@ -201,20 +199,20 @@ function sosed_amchart(map_div_id,
                                 "</tr>" +
                               "</thead>" +
                               "<tbody>";
-        
+
         worldSeries.data = data.map(function(row){
-          
+
           row.id = row.code;
-          
+
           var country = am4geodata_data_countries2[row.id];
-          
+
           if(row.frequency > 0){
             row.color = chart.colors.getIndex(continents[country.continent_code]);
-            
+
           }
-          
+
           //row.map = country.maps[0];
-          
+
           return row;
         });
         var row_order = Object.keys(data);
@@ -223,28 +221,28 @@ function sosed_amchart(map_div_id,
         row_order.sort(function(a,b) {
           return data[a].frequency - data[b].frequency;
         });
-        
+
         data_sorted = [];
         for(var i = 0; i < data.length; i++){
           data_sorted[i] = data[row_order[i]];
         }
         data_sorted = data_sorted.reverse();
-        
+
         data_sorted.forEach(function(row){
           if(row.frequency !== "" && parseFloat(row.frequency) !== 0){
             table_content +=  "<tr>"+
                                 "<td>" + row.country + "</td>" +
                                 "<td>" + row.frequency + "</td>" +
-                              "</tr>";					
+                              "</tr>";
           }
         });
-        
-        
+
+
         table_content += "</tbody>"  + "</table>";
         $("#" + table_id).html(table_content);
-        
+
       }
     });
-  },5000);                           
-                           
+  },5000);
+
 }
